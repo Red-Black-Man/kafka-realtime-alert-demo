@@ -8,7 +8,8 @@ This demo simulates a middleware for sequential Kafka consumption and multi-leve
 From my 9+ years experience in distributed systems.
 
 ## Architecture
-![Architecture Diagram](architecture.png)  <!-- Upload the image below -->
+<img width="954" height="474" alt="image" src="https://github.com/user-attachments/assets/830f5b23-20db-4bfd-95af-b2ea2b888bfb" />
+
 
 ## Code Sample
 See `AlertConsumer.java` for core logic.
