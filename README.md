@@ -1,32 +1,41 @@
-# kafka-realtime-alert-demo
-Demo of real-time Kafka alert middleware for high-volume security systems
-
-# Project Demo: Real-Time Alert Middleware (Kafka/WebSocket)
+# Real-Time Alert Middleware Demo (Kafka/WebSocket Integration)
 
 ## Description
-This demo simulates a middleware for sequential Kafka consumption and multi-level WebSocket pushes in a security platform. Key achievements:
-- Reduced end-to-end latency to 150ms.
-- Handled 2M+ daily alerts with ordered events.
-- Boosted SLA to 99.97%.
+This demo showcases a middleware for sequential Kafka consumption and multi-level WebSocket pushes in a high-volume security platform, based on a production national grid system. Key achievements:
+- Reduced end-to-end latency to 150ms with ordered events.
+- Handled 2M+ daily alerts with SLA 99.97%.
+- Integrated with Spring Boot for microservices, supporting failover and elastic scaling.
 
-Based on my 9+ years experience in distributed systems.
+From my 9+ years of experience in distributed systems (project from 2022).
 
 ## Architecture
-![Architecture Diagram](architecture.png)  <!-- 稍后上传图片 -->
+![Architecture Diagram](architecture.png)  <!-- Upload the image below -->
 
 ## Code Sample
+See `AlertConsumer.java` for the core logic.
+
 ```java
-@KafkaListener(topics = "alerts", groupId = "alert-group")
-public void consumeAlert(ConsumerRecord<String, Alert> record) {
-    // Sequential processing logic
-    Alert alert = record.value();
-    webSocketService.pushAlert(alert);  // Push to WebSocket
-    // Latency optimization: 150ms end-to-end
-}
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
-public class WebSocketService {
-    public void pushAlert(Alert alert) {
-        // Multi-level push with WebSocket
+public class AlertConsumer {
+
+    private final SimpMessagingTemplate webSocketTemplate;
+
+    public AlertConsumer(SimpMessagingTemplate webSocketTemplate) {
+        this.webSocketTemplate = webSocketTemplate;
+    }
+
+    @KafkaListener(topics = "alerts", groupId = "alert-group", containerFactory = "kafkaListenerContainerFactory")
+    public void consumeAlert(String alertMessage) {
+        // Sequential processing logic (ensure order with partitions or keys)
+        System.out.println("Received alert: " + alertMessage);
+        
+        // Push to WebSocket (multi-level: e.g., admin/user channels)
+        webSocketTemplate.convertAndSend("/topic/alerts", alertMessage);
+        
+        // Latency optimization: Use async processing if needed, but keep sequential
     }
 }
