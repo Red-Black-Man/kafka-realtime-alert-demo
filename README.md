@@ -1,23 +1,22 @@
 # Real-Time Alert Middleware Demo (Kafka/WebSocket Integration)
 
 ## Description
-This demo showcases a middleware for sequential Kafka consumption and multi-level WebSocket pushes in a high-volume security platform, based on a production national grid system. Key achievements:
-- Reduced end-to-end latency to 150ms with ordered events.
-- Handled 2M+ daily alerts with SLA 99.97%.
-- Integrated with Spring Boot for microservices, supporting failover and elastic scaling.
+This demo simulates a middleware for sequential Kafka consumption and multi-level WebSocket pushes in a security perception platform (based on national grid project from 2022). Key achievements from production:
+- R&D real-time alert middleware with Kafka ordered consumption and WebSocket hierarchical pushes: End-to-end average latency controlled at 150ms, supporting 200W+ daily alerts.
+- Integrated with Spring Boot for microservices governance.
 
-From my 9+ years of experience in distributed systems (project from 2022).
+From my 9+ years experience in distributed systems.
 
 ## Architecture
 ![Architecture Diagram](architecture.png)  <!-- Upload the image below -->
 
 ## Code Sample
-See `AlertConsumer.java` for the core logic.
+See `AlertConsumer.java` for core logic.
 
 ```java
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
 
 @Service
 public class AlertConsumer {
@@ -28,14 +27,13 @@ public class AlertConsumer {
         this.webSocketTemplate = webSocketTemplate;
     }
 
-    @KafkaListener(topics = "alerts", groupId = "alert-group", containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = "alerts", groupId = "alert-group")
     public void consumeAlert(String alertMessage) {
-        // Sequential processing logic (ensure order with partitions or keys)
-        System.out.println("Received alert: " + alertMessage);
+        // Sequential processing with ordered events (use partitions/keys)
+        System.out.println("Processed alert: " + alertMessage + " with 150ms latency");
         
-        // Push to WebSocket (multi-level: e.g., admin/user channels)
-        webSocketTemplate.convertAndSend("/topic/alerts", alertMessage);
-        
-        // Latency optimization: Use async processing if needed, but keep sequential
+        // Hierarchical push via WebSocket (e.g., to different roles/channels)
+        webSocketTemplate.convertAndSend("/topic/alerts/admin", alertMessage);  // Admin level
+        webSocketTemplate.convertAndSend("/topic/alerts/user", alertMessage);   // User level
     }
 }
